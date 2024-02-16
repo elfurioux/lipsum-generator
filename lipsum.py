@@ -1,4 +1,5 @@
-
+from random import randint
+ 
 BASIC_LIPSUM = """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus
 tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. Maecenas
 ligula massa, varius a, semper congue, euismod non, mi. Proin porttitor, orci nec nonummy molestie, enim
@@ -21,6 +22,56 @@ in justo. Suspendisse cursus rutrum augue. Nulla tincidunt tincidunt mi. Curabit
 rhoncus faucibus, felis magna fermentum augue, et ultricies lacus lorem varius purus. Curabitur eu amet.
 """
 LIPSUM = BASIC_LIPSUM.replace("\n"," ").split(" ")
+
+basicWords, specialWords = [], []
+for word in LIPSUM:
+    if word.count(';')>0 or word.count(',')>0 or word.count('.')>0:
+        specialWords.append(word)
+    else:
+        basicWords.append(word)
+
+def pick(__l: list):
+    return __l[randint(0, len(__l)-1)]
+
+def lipsum(words: int, startswithloremipsum: bool = False) -> str:
+    __text = []
+
+    for i in range(words):
+        if i+1 >= words: # if it's the last iteration
+            __text.append(pick(specialWords)[:-1] + ".")
+        elif i == 0: # first iteration
+            __text.append(str.capitalize(pick(basicWords)))
+        elif randint(1,10) <= 8: # ~80% chance
+            __text.append(pick(basicWords))
+        else:
+            __text.append(pick(specialWords))
+
+    if startswithloremipsum:
+        return " ".join(["Lorem","ipsum","dolor","sit","amet,"] + __text[5:])
+    return " ".join(__text)
+
+def wrap(text: str, char_per_line: int, tolerance: float = 0.10) -> str:
+    __rtext = ""
+
+    i = 0
+    for char in text:
+        i += 1
+        if i <= char_per_line:
+            __rtext += char
+            continue
+
+        if i < char_per_line*(1+tolerance):
+            if char == ' ':
+                __rtext += '\n'
+                i = 0
+            else:
+                __rtext += char
+        
+        else:
+            __rtext += '-' + '\n'
+            i = 0
+
+    return __rtext
 
 import os.path
 
@@ -78,7 +129,17 @@ def main(argv: list[str]):
             print("ERROR:",ERR[0x12].format(opt))
             return
 
-    print(f"{filename=}; {wordcount=}; {options=}")
+    # print(f"{filename=}; {wordcount=}; {options=}")
+
+    text = wrap(
+        lipsum(wordcount, len(options)>0),
+        90,
+        0.15
+    )
+    with open(file=filename,mode="w",encoding="utf8") as fstream:
+        fstream.write(text)
+    
+    print("done!")
 
 if __name__=="__main__":
     from sys import argv
