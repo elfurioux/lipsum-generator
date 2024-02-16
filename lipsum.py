@@ -1,5 +1,5 @@
 from random import randint
- 
+
 BASIC_LIPSUM = """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus
 tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. Maecenas
 ligula massa, varius a, semper congue, euismod non, mi. Proin porttitor, orci nec nonummy molestie, enim
@@ -30,10 +30,12 @@ for word in LIPSUM:
     else:
         basicWords.append(word)
 
-def pick(__l: list):
+def pick(__l: list) -> object:
+    """Pick a random index in the list `__l` and returns it."""
     return __l[randint(0, len(__l)-1)]
 
 def lipsum(words: int, startswithloremipsum: bool = False) -> str:
+    """Generates a Lorem Ipsum text with a determined number of words."""
     __text = []
 
     for i in range(words):
@@ -51,6 +53,13 @@ def lipsum(words: int, startswithloremipsum: bool = False) -> str:
     return " ".join(__text)
 
 def wrap(text: str, char_per_line: int, tolerance: float = 0.10) -> str:
+    """Word wrapping function, loops through the `text` and when the line is at least
+    `char_per_line` long, marks a newline at the next word, `tolerance` is a float
+    number from 0 to 1, it represents the absolute maximum characters per line, such as:
+    `char_per_line` * (1 + `tolerance`)
+    Example, `tolerance` is `0.10` and `char_per_line` is 100, the maximum numbers of chars
+    per line is `100*1.10` = `110`
+    Tolerance of zero cuts the string precisely at `char_per_line` numbers of chars."""
     __rtext = ""
 
     i = 0
@@ -60,6 +69,7 @@ def wrap(text: str, char_per_line: int, tolerance: float = 0.10) -> str:
             __rtext += char
             continue
 
+        # From this point code executes if i is over char_per_line
         if i < char_per_line*(1+tolerance):
             if char == ' ':
                 __rtext += '\n'
@@ -67,12 +77,15 @@ def wrap(text: str, char_per_line: int, tolerance: float = 0.10) -> str:
             else:
                 __rtext += char
         
+        # If a space is not found between the char_per_line and tolerance,
+        # cuts the line here and \n
         else:
             __rtext += '-' + '\n'
             i = 0
 
     return __rtext
 
+### ------------------------------ MAIN CODE ------------------------------ ###
 import os.path
 
 __HSUGG = "Type 'python lipsum.py -h' for more infos"
