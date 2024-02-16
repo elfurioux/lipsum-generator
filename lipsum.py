@@ -1,57 +1,72 @@
-from random import randint
-from lipsum_constants import (BASIC_WORDS, SPECIAL_WORDS)
+from lipsumfuncs import (wrap,lipsum)
+import os.path
 
-def pick(__l: list) -> object:
-    """Pick a random index in the list `__l` and returns it."""
-    return __l[randint(0, len(__l)-1)]
+__HSUGG = "Type 'python lipsum.py -h' for more infos"
+USAGE = "Usage: python lipsum.py <filename> <word count> [-l | --lorem]" + '\n' + __HSUGG
+HELP = f"""{USAGE.split('\n')[0]}
 
-def lipsum(words: int, startswithloremipsum: bool = False) -> str:
-    """Generates a Lorem Ipsum text with a determined number of words."""
-    __text = []
+-h              : Provides this help page and then exit.
+-l | --lorem    : [Optional] Starts the lipsum by "Lorem ipsum dolor sit amet, (...)"
+"""[:-1]
+ERR = {
+    # 0x00 to 0x1F: Critical argument errors
+    #   0x00 to 0x0F: Classic argument error
+    #   0x10 to 0x1F: Argument error to be provided with 1 string via format()
+    0x00: "TOO FEW ARGUMENTS",
+    0x01: "TOO MANY ARGUMENTS",
+    0x10: "FILE \"{0}\" ALREADY EXISTS",
+    0x11: "DIRECTORY \"{0}\" DOESN'T EXIST, CREATE IT",
+    0x12: "INVALID WORDCOUNT \"{0}\"",
+    0x12: "UNRECOGNISED ARGUMENT \"{0}\""
+}
+ARGUMENTS = ["-l","--lorem"]
 
-    for i in range(words):
-        if i+1 >= words: # if it's the last iteration
-            __text.append(pick(SPECIAL_WORDS)[:-1] + ".")
-        elif i == 0: # first iteration
-            __text.append(str.capitalize(pick(BASIC_WORDS)))
-        elif randint(1,10) <= 8: # ~80% chance
-            __text.append(pick(BASIC_WORDS))
-        else:
-            __text.append(pick(SPECIAL_WORDS))
+def main(argv: list[str]):
+    argn = len(argv)
+    if argn >= 2 and argv[1]=="-h":
+        print(HELP)
+        return
+    if argn > 4 or argn < 3:
+        print("ERROR:", ERR[0x00+int(argn>4)])
+        print(USAGE,sep="\n")
+        return
 
-    if startswithloremipsum:
-        return " ".join(["Lorem","ipsum","dolor","sit","amet,"] + __text[5:])
-    return " ".join(__text)
+    filename = argv[1]
+    usr_wordcount = argv[2]
+    options = argv[3:]
 
-def wrap(text: str, char_per_line: int, tolerance: float = 0.10) -> str:
-    """Word wrapping function, loops through the `text` and when the line is at least
-    `char_per_line` long, marks a newline at the next word, `tolerance` is a float
-    number from 0 to 1, it represents the absolute maximum characters per line, such as:
-    `char_per_line` * (1 + `tolerance`)
-    Example, `tolerance` is `0.10` and `char_per_line` is 100, the maximum numbers of chars
-    per line is `100*1.10` = `110`
-    Tolerance of zero cuts the string precisely at `char_per_line` numbers of chars."""
-    __rtext = ""
+    _abs_fname = os.path.abspath(filename)
+    _dir = os.path.dirname(_abs_fname)
+    if os.path.isfile(filename):
+        print("ERROR:",ERR[0x10].format(filename))
+        return
+    if not os.path.isdir(_dir):
+        print("ERROR:",ERR[0x11].format(_dir))
+        return
 
-    i = 0
-    for char in text:
-        i += 1
-        if i <= char_per_line:
-            __rtext += char
-            continue
+    try:
+        wordcount = int(usr_wordcount)
+    except ValueError:
+        print("ERROR:",ERR[0x12].format(usr_wordcount))
+        return
 
-        # From this point code executes if i is over char_per_line
-        if i < char_per_line*(1+tolerance):
-            if char == ' ':
-                __rtext += '\n'
-                i = 0
-            else:
-                __rtext += char
-        
-        # If a space is not found between the char_per_line and tolerance,
-        # cuts the line here and \n
-        else:
-            __rtext += '-' + '\n'
-            i = 0
+    for opt in options:
+        if opt not in ARGUMENTS:
+            print("ERROR:",ERR[0x12].format(opt))
+            return
 
-    return __rtext
+    # print(f"{filename=}; {wordcount=}; {options=}")
+
+    text = wrap(
+        lipsum(wordcount, len(options)>0),
+        90,
+        0.15
+    )
+    with open(file=filename,mode="w",encoding="utf8") as fstream:
+        fstream.write(text)
+    
+    print("done!")
+
+if __name__=="__main__":
+    from sys import argv
+    main(argv)
