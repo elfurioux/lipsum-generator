@@ -1,9 +1,10 @@
 from lipsumfuncs import (wrap,lipsum)
 import os.path
 
+_NL = '\n'
 __HSUGG = "Type 'python lipsum.py -h' for more infos"
 USAGE = "Usage: python lipsum.py <filename> <word count> [-l | --lorem]" + '\n' + __HSUGG
-HELP = f"""{USAGE.split('\n')[0]}
+HELP = f"""{USAGE.split(_NL)[0]}
 
 -h              : Provides this help page and then exit.
 -l | --lorem    : [Optional] Starts the lipsum by "Lorem ipsum dolor sit amet, (...)"
