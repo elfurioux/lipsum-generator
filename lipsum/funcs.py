@@ -1,26 +1,26 @@
 from random import randint
-from lipsum.constants import (BASIC_WORDS, SPECIAL_WORDS, BEGINNING)
+import lipsum.constants as constants
 
 def pick(__l: list) -> object:
     """Pick a random index in the list `__l` and returns it."""
     return __l[randint(0, len(__l)-1)]
 
-def lipsum(words: int, lipsumStart: bool = False) -> str:
+def gen(words: int, lipsumStart: bool = False) -> str:
     """Generates a Lorem Ipsum text with a determined number of words."""
     __text = []
 
     for i in range(words):
         if i+1 >= words: # if it's the last iteration
-            __text.append(pick(SPECIAL_WORDS)[:-1] + ".")
+            __text.append(pick(constants.SPECIAL_WORDS)[:-1] + ".")
         elif i == 0: # first iteration
-            __text.append(str.capitalize(pick(BASIC_WORDS)))
+            __text.append(str.capitalize(pick(constants.BASIC_WORDS)))
         elif randint(1,10) <= 8: # ~80% chance
-            __text.append(pick(BASIC_WORDS))
+            __text.append(pick(constants.BASIC_WORDS))
         else:
-            __text.append(pick(SPECIAL_WORDS))
+            __text.append(pick(constants.SPECIAL_WORDS))
 
     if lipsumStart:
-        return " ".join(BEGINNING + __text[5:])
+        return " ".join(constants.BEGINNING + __text[5:])
     return " ".join(__text)
 
 def wrap(text: str, char_per_line: int, tolerance: float = 0.10) -> str:

@@ -1,4 +1,4 @@
-from lipsum.funcs import (wrap,lipsum)
+import lipsum.funcs as funcs
 import lipsum.constants as constants
 import os.path
 
@@ -39,8 +39,8 @@ def main(argv: list[str], _vb: bool = False):
 
     if _vb: print(f"{filename=}; {wordcount=}; {options=}")
 
-    text = wrap(
-        lipsum(wordcount, len(options)>0),
+    text = funcs.wrap(
+        funcs.gen(wordcount, len(options)>0),
         90,
         0.15
     )
