@@ -1,62 +1,43 @@
-from lipsum.utils import (wrap,lipsum)
+from lipsum.funcs import (wrap,lipsum)
+import lipsum.constants as constants
 import os.path
 
-_NL = '\n'
-__HSUGG = "Type 'python lipsum.py -h' for more infos"
-USAGE = "Usage: python lipsum.py <filename> <word count> [-l | --lorem]" + '\n' + __HSUGG
-HELP = f"""{USAGE.split(_NL)[0]}
-
--h              : Provides this help page and then exit.
--l | --lorem    : [Optional] Starts the lipsum by "Lorem ipsum dolor sit amet, (...)"
-"""[:-1]
-ERR = {
-    # 0x00 to 0x1F: Critical argument errors
-    #   0x00 to 0x0F: Classic argument error
-    #   0x10 to 0x1F: Argument error to be provided with 1 string via format()
-    0x00: "TOO FEW ARGUMENTS",
-    0x01: "TOO MANY ARGUMENTS",
-    0x10: "FILE \"{0}\" ALREADY EXISTS",
-    0x11: "DIRECTORY \"{0}\" DOESN'T EXIST, CREATE IT",
-    0x12: "INVALID WORDCOUNT \"{0}\"",
-    0x12: "UNRECOGNISED ARGUMENT \"{0}\""
-}
-ARGUMENTS = ["-l","--lorem"]
-
-def main(argv: list[str]):
+def main(argv: list[str], _vb: bool = False):
     argn = len(argv)
-    if argn >= 2 and argv[1]=="-h":
-        print(HELP)
-        return
-    if argn > 4 or argn < 3:
-        print("ERROR:", ERR[0x00+int(argn>4)])
-        print(USAGE,sep="\n")
-        return
+    if argn >= 1 and argv[0]=="-h":
+        print(constants.HELP)
+        exit(0)
+    if argn > 3 or argn < 2:
+        # argn>3 will be either 0 or 1 so the error would be either too few or too many arguments
+        print("ERROR:", constants.ERR[0x00+int(argn>3)])
+        print(constants.USAGE,sep="\n")
+        exit(1)
 
-    filename = argv[1]
-    usr_wordcount = argv[2]
-    options = argv[3:]
+    filename = argv[0]
+    usr_wordcount = argv[1]
+    options = argv[2:]
 
     _abs_fname = os.path.abspath(filename)
     _dir = os.path.dirname(_abs_fname)
     if os.path.isfile(filename):
-        print("ERROR:",ERR[0x10].format(filename))
-        return
+        print("ERROR:",constants.ERR[0x10].format(filename))
+        exit(1)
     if not os.path.isdir(_dir):
-        print("ERROR:",ERR[0x11].format(_dir))
-        return
+        print("ERROR:",constants.ERR[0x11].format(_dir))
+        exit(1)
 
     try:
         wordcount = int(usr_wordcount)
     except ValueError:
-        print("ERROR:",ERR[0x12].format(usr_wordcount))
-        return
+        print("ERROR:",constants.ERR[0x12].format(usr_wordcount))
+        exit(1)
 
     for opt in options:
-        if opt not in ARGUMENTS:
-            print("ERROR:",ERR[0x12].format(opt))
-            return
+        if opt not in constants.ARGUMENTS:
+            print("ERROR:",constants.ERR[0x12].format(opt))
+            exit(1)
 
-    # print(f"{filename=}; {wordcount=}; {options=}")
+    if _vb: print(f"{filename=}; {wordcount=}; {options=}")
 
     text = wrap(
         lipsum(wordcount, len(options)>0),
@@ -70,4 +51,4 @@ def main(argv: list[str]):
 
 if __name__=="__main__":
     from sys import argv
-    main(argv)
+    main(argv=argv[1:])

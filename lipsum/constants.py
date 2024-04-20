@@ -29,3 +29,24 @@ for word in LIPSUM:
         SPECIAL_WORDS.append(word)
     else:
         BASIC_WORDS.append(word)
+
+_NL = '\n'
+__HSUGG = "Type 'python lipsum.py -h' for more infos"
+USAGE = "Usage: python lipsum.py <filename> <word count> [-l | --lorem]" + '\n' + __HSUGG
+HELP = f"""{USAGE.split(_NL)[0]}
+
+-h              : Provides this help page and then exit.
+-l | --lorem    : [Optional] Starts the lipsum by "Lorem ipsum dolor sit amet, (...)"
+"""[:-1]
+ERR = {
+    # 0x00 to 0x1F: Critical argument errors
+    #   0x00 to 0x0F: Classic argument error
+    #   0x10 to 0x1F: Argument error to be provided with 1 string via format()
+    0x00: "TOO FEW ARGUMENTS",
+    0x01: "TOO MANY ARGUMENTS",
+    0x10: "FILE \"{0}\" ALREADY EXISTS",
+    0x11: "DIRECTORY \"{0}\" DOESN'T EXIST, CREATE IT",
+    0x12: "INVALID WORDCOUNT \"{0}\"",
+    0x12: "UNRECOGNISED ARGUMENT \"{0}\""
+}
+ARGUMENTS = ["-l","--lorem"]
