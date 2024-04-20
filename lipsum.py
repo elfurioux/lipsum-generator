@@ -1,4 +1,4 @@
-from lipsumfuncs import (wrap,lipsum)
+from lipsum.utils import (wrap,lipsum)
 import os.path
 
 _NL = '\n'
